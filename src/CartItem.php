@@ -14,12 +14,12 @@ class CartItem{
     /**
      * @var int How many of this item is added to cart.
      */
-    public $quantity = 0;
+    protected $quantity = 0;
 
     /**
      * @var double How much is the total price of this item.
      */
-    public $total_price = 0;
+    protected $total_price = 0;
 
     /**
      * instantiate a new object of cart item
@@ -39,27 +39,34 @@ class CartItem{
     {
         $this->item = $item;
         
-        $this->increment();
+        $this->increase();
     }
 
     /**
-     * Increment the quantity and the total price for this item
+     * increase the quantity and the total price for this item
      * 
      */
-    public function increment()
+    public function increase()
     {
         $this->quantity++; 
         $this->total_price = $this->quantity * $this->item->price;
     }
 
     /**
-     * Decrement the quantity and the total price for this item
-     * 
+     * decrease the quantity and the total price for this item
+     * @return bool if quantity already is 0 will return false, 
+     * otherwise true is returned
      */
-    public function decrement()
+    public function decrease()
     {
+        if ($this->quantity == 0) {
+            return false;
+        }
+
         $this->quantity--; 
         $this->total_price = $this->quantity * $this->item->price;
+
+        return true;
     }
 
     public function getItem()
@@ -67,6 +74,15 @@ class CartItem{
         return $this->item;
     }
 
+    public function quantity()
+    {
+        return $this->quantity;
+    }
+
+    public function totalPrice()
+    {
+        return $this->total_price;
+    }
 
     /**
      * To get a given attribute if exists otherwise returns null

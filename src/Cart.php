@@ -3,6 +3,7 @@
 namespace Girover\Cart;
 
 use Girover\Cart\Events\CartDataWasUpdated;
+use Illuminate\Database\Eloquent\Model;
 
 class Cart {
 
@@ -48,41 +49,69 @@ class Cart {
     public function add($item, $id)
     {
         // Convert array to object if array is provided
-        $item = is_array($item) ? (object)$item : $item;
+        $item = $this->convertToCartItem($item);
+        // $item = is_array($item) ? (object)$item : $item;
 
         if ($this->hasItem($id)) {
-            return $this->incrementItemQuantity($id);
+            return $this->increaseItemQuantity($id);
         }
 
         $cart_item = new CartItem($item);
         
         $this->items[$id]=$cart_item;
 
-        return $this->recalculate($item->price);
+        return $this->increaseAndRecalculate($item->price);
     }
 
     /**
-     * To increment the quantity of a specific item in the cart.
+     * To convert the given item to object.
+     * If item is instance of \Illuminate\Database\Eloquent\Model only attributes
+     * will be converted to an object
      * 
-     * @param mix $id The item in the cart that is associated to the given index(or key name).
+     * @param mix $item
+     * @return mix
      */
-    public function incrementItemQuantity($id)
+    public function convertToCartItem($item)
     {
-        ($this->items[$id])->increment();
+        if (is_array($item)) {
+            return (object)$item;
+        }
+        
+        if ($item instanceof Model) {
+            return (object)$item->attributesToArray();
+        }
 
-        return $this->recalculate(($this->items[$id])->price);
+        return $item;
     }
 
     /**
-     * To increment the quantity of a specific item in the cart.
+     * To increase the quantity of a specific item in the cart.
      * 
      * @param mix $id The item in the cart that is associated to the given index(or key name).
      */
-    public function decrementItemQuantity($id)
+    public function increaseItemQuantity($id)
     {
-        ($this->items[$id])->decrement();
+        if (! $this->hasItem($id)) {
+            return;
+        }
+        ($this->items[$id])->increase();
 
-        return $this->recalculate(($this->items[$id])->price);
+        return $this->increaseAndRecalculate(($this->items[$id])->price);
+    }
+
+    /**
+     * To increase the quantity of a specific item in the cart.
+     * 
+     * @param mix $id The item in the cart that is associated to the given index(or key name).
+     */
+    public function decreaseItemQuantity($id)
+    {
+        if (! $this->hasItem($id)) {
+            return;
+        }
+        if (($this->items[$id])->decrease()) {
+            $this->decreaseAndRecalculate(($this->items[$id])->price);
+        }
     }
 
     /**
@@ -97,29 +126,37 @@ class Cart {
     }
 
     /**
-     * Increment total quantity
+     * Recalculate the total quantity and the total price
+     * when adding new item to the cart
      */
-    public function incrementTotalQuantity()
+    public function increaseAndRecalculate($add_price)
     {
         $this->total_quantity++;
-    }
-
-    /**
-     * Increment total quantity
-     */
-    public function incrementTotalPrice($price)
-    {
-        $this->total_price += $price;
+        $this->total_price += $add_price;
+        
+        event(new CartDataWasUpdated($this));
     }
 
     /**
      * Recalculate the total quantity and the total price
      * when adding new item to the cart
      */
-    public function recalculate($add_price)
+    public function decreaseAndRecalculate($add_price)
     {
-        $this->incrementTotalQuantity();
-        $this->incrementTotalPrice($add_price);
+        $this->total_quantity--;
+        $this->total_price -= $add_price;
+        
+        event(new CartDataWasUpdated($this));
+    }
+
+    /**
+     * Recalculate the total quantity and the total price
+     * when adding new item to the cart
+     */
+    public function decreaseItemAndRecalculate(CartItem $item)
+    {
+        $this->total_quantity -= $item->quantity();
+        $this->total_price    -= $item->totalPrice();
         
         event(new CartDataWasUpdated($this));
     }
@@ -135,8 +172,9 @@ class Cart {
     }
 
     /**
-     * Determine if the cart has specific item
-     * @param string $key
+     * Remove specific item from the cart,
+     * and decrease the total quantity and total price
+     * @param string $id
      * 
      * @return bool
      */
@@ -144,7 +182,10 @@ class Cart {
     {
         if ($this->hasItem($id)) {
 
+            $item = $this->items[$id];
             unset($this->items[$id]);
+
+            $this->decreaseItemAndRecalculate($item);
 
             event(new CartDataWasUpdated($this));
             
