@@ -50,7 +50,7 @@ this command will take care of the following tasks:
  - Migrate the published migrations.    
 
 ## Configuration
-```girover/cart``` offers two way to use the cart in your application.   
+```girover/cart``` offers two ways to use the cart in your application.   
  - Authenticated User using database driver for storing cart data.
  - Session driver to store cart data in session.
 
@@ -77,7 +77,28 @@ In database cart your ```User``` model must use trait ```Girover\Cart\Concerns\H
     shopping_cart()->add(['id'=>'1', 'name'=>'Iphone 13', 'price'=>1000], 'id');
  ```
 Notice that the second argument takes an attribute's name to make sure that items are associated with a specific key, which makes it easier for counting and processing items.
-If you choose ```name``` for example, so every time you add new item with name ```Iphone 13``` to the cart then only quantity and total price of this item will be changed.
+If you choose ```name``` for example, so every time you add new item with name ```Iphone 13``` to the cart then only quantity and total price of this item will be changed.   
+
+You can also pass a model as first parameter to the cart's ```add``` method.   
+
+```php
+
+    use App\Models\Product;
+
+    $product = Product::find(1);
+
+    shopping_cart()->add($product, $product->id);
+
+```   
+
+To increase quantity of specific item in the cart, you can use the method ```increaseItemQuantity($key)```   
+
+```php
+
+    $product = Product::find(1);
+    shopping_cart()->increaseItemQuantity($product->id);
+
+```
 ## Testing
 
 ## Changelog
