@@ -20,7 +20,7 @@ class CartFactory extends Factory
         ];
     }
 
-    protected function newCart()
+    private function newCart()
     {
         $cart = new CartCart;
 
