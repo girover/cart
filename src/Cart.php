@@ -50,8 +50,6 @@ class Cart {
     {
         // Convert array to object if array is provided
         $item = $this->convertToCartItem($item);
-        // $item = is_array($item) ? (object)$item : $item;
-
         if ($this->hasItem($id)) {
             return $this->increaseItemQuantity($id);
         }

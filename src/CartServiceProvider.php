@@ -2,8 +2,10 @@
 
 namespace Girover\Cart;
 
-use Girover\Cart\Commands\CartCommand;
+use Girover\Cart\Console\CartCommand;
 use Girover\Cart\Providers\EventServiceProvider;
+use Girover\Cart\Services\DatabaseAuthCartService;
+use Girover\Cart\Services\SessionCartService;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -29,6 +31,10 @@ class CartServiceProvider extends PackageServiceProvider {
 
     public function boot()
     {
+        $this->app->singleton('cartService',function($app){
+            return (config('cart.driver')=='session')? new SessionCartService : new DatabaseAuthCartService;
+        });
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CartCommand::class,

@@ -1,6 +1,6 @@
 <?php
 
-namespace Girover\Cart\Commands;
+namespace Girover\Cart\Console;
 
 use Girover\Cart\CartServiceProvider;
 use Illuminate\Console\Command;
