@@ -15,7 +15,7 @@ class CartServiceProvider extends PackageServiceProvider {
     {
         $package->name('cart')
                 ->hasMigrations(['create_carts_table'])
-                ->hasConfigFile('tree');
+                ->hasConfigFile('cart');
                 // ->hasViews()
                 //->hasAssets()
                 //->hasTranslations()
