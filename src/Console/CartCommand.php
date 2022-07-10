@@ -15,6 +15,7 @@ class CartCommand extends Command
     public function handle()
     {
         $this->info('Starting installing package girover\\cart');
+        $this->publishConfigFile();
         $this->publishMigrations();
         $this->runMigrate();
     }
@@ -33,6 +34,12 @@ class CartCommand extends Command
             return $this->line('<fg=green>Succeed</>');
         }
         return $this->line('<fg=red>Failed</>');
+    }
+
+    public function publishConfigFile()
+    {
+        $this->line('<fg=yellow>Publishing config file cart.php....</>');
+        return $this->cartPublish('cart-config');
     }
 
     public function publishMigrations()
