@@ -4,9 +4,17 @@ if (! function_exists('shopping_cart')) {
 
     function shopping_cart() {
         
-        $cart_service = app()->make('cartService');
+        static $cart = null;
 
-        return $cart_service->getCart();
+        if ($cart === null) {
+
+            // $cart_service = app()->make('cartService');
+    
+            // $cart =  $cart_service->getCart();
+            $cart =  (app()->make('cartService'))->getCart();
+        }
+
+        return $cart;
     }
 
 }

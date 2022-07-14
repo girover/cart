@@ -48,11 +48,11 @@ class Cart {
      */
     public function add($item, $id)
     {
-        // Convert array to object if array is provided
-        $item = $this->convertToCartItem($item);
         if ($this->hasItem($id)) {
             return $this->increaseItemQuantity($id);
         }
+        // Convert array to object if array is provided
+        $item = $this->convertToCartItem($item);
 
         $cart_item = new CartItem($item);
         
