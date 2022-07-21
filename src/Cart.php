@@ -194,6 +194,18 @@ class Cart {
     }
 
     /**
+     * Remove all items from cart
+     */
+    public function clear()
+    {
+        $this->items = [];
+        $this->total_quantity = 0;    
+        $this->total_price = 0;
+
+        event(new CartDataWasUpdated($this));        
+    }
+
+    /**
      * Get total quantity of items the cart
      * 
      * @return int
